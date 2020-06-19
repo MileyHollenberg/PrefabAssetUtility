@@ -4,6 +4,9 @@ A utility package that keeps track of the connections between prefabs and their 
 # Performance
 This package has been tested on a project with 10K+ prefabs, initial cache generation took roughly 30 seconds and after that it incrementally updates itself
 
+# Asset Serialization Mode
+Must be set to Force Text in order for this package to work
+
 # Usage
 Get all prefabs which use a specific asset/component based on its GUID
 `PrefabUtility.GetPrefabsForGUID("f7a4213c60a3426995bb8b901c2ea1fd")`
