@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c47d527760fc5b143be60eb8042edd32
+guid: b6114b830f6742e0ba1d55ddb48a6d23
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -8,7 +8,7 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 305d72b64a2242c0b6ff1d70a6bc89f4, type: 3}
-  name: io.megamiley.PrefabAssetUtility
+  name: io.megamiley.prefab-asset-utility
   version: 0.1.0
   displayName: PrefabAssetUtility
   description: 'Utility package that allows you to get all prefabs using a certain
@@ -16,17 +16,26 @@ ScriptedImporter:
 
 
     Requires one time setup and then automatically keeps
-    track of all changes incrementally'
+    track of all changes incrementally.
+
+
+    Only works in the Editor'
   unity: 2018.4
   unityRelease: 
   dependencies:
     keyValuePairs:
     - key: com.newtonsoft.json
       value: https://github.com/PixelWizards/com.newtonsoft.json.git
-  keywords: []
+  keywords:
+  - prefab
+  - asset
+  - utility
+  - path
+  - component
+  - guid
   author:
     name: Miley Hollenberg
     email: mileyhollenberg@gmai.com
-    url: 
+    url: https://github.com/MileyHollenberg/PrefabAssetUtility
   autoExportJson: 1
   registryUrl: https://registry.my-company.com

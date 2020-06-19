@@ -12,8 +12,8 @@ namespace PrefabAssetUtility.Editor
 {
     public static class PrefabUtils
     {
-        private const string PREFAB_TO_GUID_PATH = "PrefabCache/PrefabToGUID.json";
-        private const string GUID_TO_PREFAB_PATH = "PrefabCache/GUIDToPrefab.json";
+        private const string PREFAB_TO_GUID_PATH = "Library/PrefabToGUID.json";
+        private const string GUID_TO_PREFAB_PATH = "Library/GUIDToPrefab.json";
 
         private static string _basePath;
 
@@ -97,35 +97,41 @@ namespace PrefabAssetUtility.Editor
             string path = $"{_basePath}{asset}";
             List<string> GUIDs = new List<string>();
 
-            using (StreamReader reader = new StreamReader(path))
+            try
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                using (StreamReader reader = new StreamReader(path))
                 {
-                    if (line.Contains("guid"))
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        GUIDs.Add(_regex.Split(line)[1]);
+                        if (line.Contains("guid"))
+                        {
+                            GUIDs.Add(_regex.Split(line)[1]);
+                        }
                     }
-                }
 
-                GUIDs = GUIDs.Distinct().ToList();
+                    GUIDs = GUIDs.Distinct().ToList();
 
-                if (_prefabToGUID.ContainsKey(asset))
-                    _prefabToGUID[asset] = GUIDs;
-                else
-                    _prefabToGUID.Add(asset, GUIDs);
-
-                foreach (string guid in GUIDs)
-                {
-                    if (_GUIDToPrefab.ContainsKey(guid))
-                    {
-                        _GUIDToPrefab[guid].Add(asset);
-                    }
+                    if (_prefabToGUID.ContainsKey(asset))
+                        _prefabToGUID[asset] = GUIDs;
                     else
+                        _prefabToGUID.Add(asset, GUIDs);
+
+                    foreach (string guid in GUIDs)
                     {
-                        _GUIDToPrefab.Add(guid, new List<string> {asset});
+                        if (_GUIDToPrefab.ContainsKey(guid))
+                        {
+                            _GUIDToPrefab[guid].Add(asset);
+                        }
+                        else
+                        {
+                            _GUIDToPrefab.Add(guid, new List<string> {asset});
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
             }
         }
 
@@ -148,22 +154,17 @@ namespace PrefabAssetUtility.Editor
                 RefreshPrefabCache();
             }
         }
-        
+
         private static void SaveCache()
         {
-            if (!Directory.Exists(_basePath + "PrefabCache"))
-            {
-                Directory.CreateDirectory(_basePath + "PrefabCache");
-            }
-
             File.Delete(_basePath + PREFAB_TO_GUID_PATH);
-            using (StreamWriter writer = new StreamWriter(_basePath + PREFAB_TO_GUID_PATH))
+            using (StreamWriter writer = new StreamWriter(Path.Combine(_basePath, PREFAB_TO_GUID_PATH)))
             {
                 writer.Write(JsonConvert.SerializeObject(_prefabToGUID));
             }
 
             File.Delete(_basePath + GUID_TO_PREFAB_PATH);
-            using (StreamWriter writer = new StreamWriter(_basePath + GUID_TO_PREFAB_PATH))
+            using (StreamWriter writer = new StreamWriter(Path.Combine(_basePath, GUID_TO_PREFAB_PATH)))
             {
                 writer.Write(JsonConvert.SerializeObject(_GUIDToPrefab));
             }

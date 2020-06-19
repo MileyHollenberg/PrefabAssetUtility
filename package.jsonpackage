@@ -7,13 +7,18 @@
     "unity"       : "2018.4",
     "unityRelease" : "",
     "dependencies" : {
-        "com.newtonsoft.json" : "https://github.com/PixelWizards/com.newtonsoft.json.git"
     },
     "keywords"     : [
+        "prefab",
+        "asset",
+        "utility",
+        "path",
+        "component",
+        "guid"
     ],
     "author"       : {
         "name" : "Miley Hollenberg",
         "email" : "mileyhollenberg@gmai.com",
-        "url"   : ""
+        "url"   : "https://github.com/MileyHollenberg/PrefabAssetUtility"
     }
 }
