@@ -1,0 +1,35 @@
+fileFormatVersion: 2
+guid: 93f4675111b914d4691935df507f7ef5
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 305d72b64a2242c0b6ff1d70a6bc89f4, type: 3}
+  name: io.megamiley.prefab-asset-utility
+  version: 0.1.0
+  displayName: PrefabAssetUtility
+  description: 'Utility package that allows you to get all prefabs using a certain
+    asset and visa versa.
+
+
+    Requires one time setup and then automatically keeps
+    track of all changes incrementally.
+
+
+    Only works in the Editor'
+  unity: 2018.4
+  unityRelease: 
+  dependencies:
+    keyValuePairs:
+    - key: com.newtonsoft.json
+      value: https://github.com/PixelWizards/com.newtonsoft.json.git
+  keywords: []
+  author:
+    name: Miley Hollenberg
+    email: mileyhollenberg@gmai.com
+    url: 
+  autoExportJson: 1
+  registryUrl: https://registry.my-company.com
