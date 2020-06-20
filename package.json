@@ -1,7 +1,7 @@
 
 {
     "name" : "io.megamiley.prefab-asset-utility",
-    "version" : "0.1.2",
+    "version" : "0.2.0",
     "displayName" : "PrefabAssetUtility",
     "description" : "Utility package that allows you to get all prefabs using a certain asset and visa versa.\n\nRequires one time setup and then automatically keeps track of all changes incrementally.\n\nOnly works in the Editor",
     "unity"       : "2018.4",

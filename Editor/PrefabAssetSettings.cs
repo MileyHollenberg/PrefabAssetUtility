@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,6 +7,7 @@ namespace PrefabAssetUtility.Editor
     internal static class PrefabAssetSettings
     {
         public const string STORE_CACHE_ON_PREFAB_CHANGE = "StoreCacheOnPrefabChange";
+        public const string LAZY_LOAD_PREFAB_CACHE = "LazyLoadPrefabCache";
 
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
@@ -18,6 +18,11 @@ namespace PrefabAssetUtility.Editor
                 guiHandler = searchContext =>
                 {
                     EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Lazy load cache on first use:");
+                    EditorPrefs.SetBool(LAZY_LOAD_PREFAB_CACHE,
+                        EditorGUILayout.Toggle(EditorPrefs.GetBool(LAZY_LOAD_PREFAB_CACHE, true)));
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField("Save cache on prefab change:");
                     EditorPrefs.SetBool(STORE_CACHE_ON_PREFAB_CHANGE,
                         EditorGUILayout.Toggle(EditorPrefs.GetBool(STORE_CACHE_ON_PREFAB_CHANGE)));
@@ -27,14 +32,8 @@ namespace PrefabAssetUtility.Editor
                     {
                         PrefabUtils.RefreshPrefabCache();
                     }
-
-                    if (GUILayout.Button("Test"))
-                    {
-                        Debug.Log(JsonConvert.SerializeObject(PrefabUtils.GetComponentsForPrefab("Assets/Prefabs/Preb1.prefab")));
-                        Debug.Log(JsonConvert.SerializeObject(PrefabUtils.GetPrefabsWithComponent<MonoBehaviour>()));
-                    }
                 },
-                keywords = new HashSet<string>(new[] {"camera", "aim", "start"})
+                keywords = new HashSet<string>(new[] {"prefab", "asset", "cache", "component", "guid"})
             };
 
             return provider;
