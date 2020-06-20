@@ -43,7 +43,7 @@ namespace PrefabAssetUtility.Editor
             _basePath = Path.GetFullPath(
                 new Uri(Path.Combine(Path.GetDirectoryName(path) ?? "", "../../")).AbsolutePath);
 
-            if (!EditorPrefs.GetBool(PrefabAssetSettings.LAZY_LOAD_PREFAB_CACHE))
+            if (!EditorPrefs.GetBool(PrefabAssetSettings.LAZY_LOAD_PREFAB_CACHE, true))
                 LoadCache();
 
             PrefabUtility.prefabInstanceUpdated += PrefabInstanceUpdated;
