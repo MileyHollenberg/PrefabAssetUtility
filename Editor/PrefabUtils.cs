@@ -15,13 +15,21 @@ namespace PrefabAssetUtility.Editor
         private const string PREFAB_TO_GUID_PATH = "Library/PrefabToGUID.json";
         private const string GUID_TO_PREFAB_PATH = "Library/GUIDToPrefab.json";
 
+        private const string PREFAB_TO_COMPONENT_PATH = "Library/PrefabToComponent.json";
+        private const string COMPONENT_TO_PREFAB_PATH = "Library/ComponentToPrefab.json";
+
         private static string _basePath;
 
         private static Dictionary<string, List<string>> _prefabToGUID = new Dictionary<string, List<string>>();
         private static Dictionary<string, List<string>> _GUIDToPrefab = new Dictionary<string, List<string>>();
 
-        private static readonly Regex _regex = new Regex(@"guid: (.*?),",
+        private static Dictionary<string, List<string>> _prefabToComponent = new Dictionary<string, List<string>>();
+        private static Dictionary<string, List<string>> _componentToPrefab = new Dictionary<string, List<string>>();
+
+        private static readonly Regex _guidRegex = new Regex(@"guid: (.*?),",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static readonly Regex _componentRegex = new Regex("^(?=[a-zA-Z0-9_])(.*):$", RegexOptions.Compiled);
 
         [InitializeOnLoadMethod]
         private static void Init()
@@ -72,8 +80,12 @@ namespace PrefabAssetUtility.Editor
         internal static void RefreshPrefabCache()
         {
             List<string> allPrefabs = GetAllPrefabs();
+
             _prefabToGUID.Clear();
             _GUIDToPrefab.Clear();
+
+            _prefabToComponent.Clear();
+            _componentToPrefab.Clear();
 
             int current = 0;
             int total = allPrefabs.Count;
@@ -96,6 +108,7 @@ namespace PrefabAssetUtility.Editor
         {
             string path = $"{_basePath}{asset}";
             List<string> GUIDs = new List<string>();
+            List<string> Components = new List<string>();
 
             try
             {
@@ -106,28 +119,17 @@ namespace PrefabAssetUtility.Editor
                     {
                         if (line.Contains("guid"))
                         {
-                            GUIDs.Add(_regex.Split(line)[1]);
+                            GUIDs.Add(_guidRegex.Split(line)[1]);
+                        }
+
+                        if (_componentRegex.IsMatch(line))
+                        {
+                            Components.Add(line.Remove(line.Length - 1));
                         }
                     }
 
-                    GUIDs = GUIDs.Distinct().ToList();
-
-                    if (_prefabToGUID.ContainsKey(asset))
-                        _prefabToGUID[asset] = GUIDs;
-                    else
-                        _prefabToGUID.Add(asset, GUIDs);
-
-                    foreach (string guid in GUIDs)
-                    {
-                        if (_GUIDToPrefab.ContainsKey(guid))
-                        {
-                            _GUIDToPrefab[guid].Add(asset);
-                        }
-                        else
-                        {
-                            _GUIDToPrefab.Add(guid, new List<string> {asset});
-                        }
-                    }
+                    AddToLists(asset, Components, ref _prefabToComponent, ref _componentToPrefab);
+                    AddToLists(asset, GUIDs, ref _prefabToGUID, ref _GUIDToPrefab);
                 }
             }
             catch (Exception e)
@@ -135,9 +137,32 @@ namespace PrefabAssetUtility.Editor
             }
         }
 
+        private static void AddToLists(string asset, List<string> Components,
+            ref Dictionary<string, List<string>> _aToB, ref Dictionary<string, List<string>> _bToA)
+        {
+            Components = Components.Distinct().ToList();
+
+            if (_aToB.ContainsKey(asset))
+                _aToB[asset] = Components;
+            else
+                _aToB.Add(asset, Components);
+
+            foreach (string component in Components)
+            {
+                if (_bToA.ContainsKey(component))
+                {
+                    _bToA[component].Add(asset);
+                    _bToA[component] = _bToA[component].Distinct().ToList();
+                }
+                else
+                    _bToA.Add(component, new List<string> {asset});
+            }
+        }
+
         private static void LoadCache()
         {
-            if (File.Exists(_basePath + PREFAB_TO_GUID_PATH) && File.Exists(_basePath + GUID_TO_PREFAB_PATH))
+            if (File.Exists(_basePath + PREFAB_TO_GUID_PATH) && File.Exists(_basePath + GUID_TO_PREFAB_PATH) &&
+                File.Exists(_basePath + PREFAB_TO_COMPONENT_PATH) && File.Exists(_basePath + COMPONENT_TO_PREFAB_PATH))
             {
                 using (StreamReader reader = new StreamReader(_basePath + PREFAB_TO_GUID_PATH))
                 {
@@ -147,6 +172,16 @@ namespace PrefabAssetUtility.Editor
                 using (StreamReader reader = new StreamReader(_basePath + GUID_TO_PREFAB_PATH))
                 {
                     _GUIDToPrefab = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
+                }
+                
+                using (StreamReader reader = new StreamReader(_basePath + PREFAB_TO_COMPONENT_PATH))
+                {
+                    _prefabToComponent = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
+                }
+
+                using (StreamReader reader = new StreamReader(_basePath + COMPONENT_TO_PREFAB_PATH))
+                {
+                    _componentToPrefab = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
                 }
             }
             else
@@ -168,6 +203,18 @@ namespace PrefabAssetUtility.Editor
             {
                 writer.Write(JsonConvert.SerializeObject(_GUIDToPrefab));
             }
+            
+            File.Delete(_basePath + PREFAB_TO_COMPONENT_PATH);
+            using (StreamWriter writer = new StreamWriter(Path.Combine(_basePath, PREFAB_TO_COMPONENT_PATH)))
+            {
+                writer.Write(JsonConvert.SerializeObject(_prefabToComponent));
+            }
+
+            File.Delete(_basePath + COMPONENT_TO_PREFAB_PATH);
+            using (StreamWriter writer = new StreamWriter(Path.Combine(_basePath, COMPONENT_TO_PREFAB_PATH)))
+            {
+                writer.Write(JsonConvert.SerializeObject(_componentToPrefab));
+            }
         }
 
         /// <summary>
@@ -177,7 +224,7 @@ namespace PrefabAssetUtility.Editor
         /// <returns>List of prefabs using the GUID</returns>
         public static List<string> GetPrefabsForGUID(string GUID)
         {
-            return _GUIDToPrefab[GUID];
+            return _GUIDToPrefab.ContainsKey(GUID) ? _GUIDToPrefab[GUID] : new List<string>();
         }
 
         /// <summary>
@@ -187,7 +234,39 @@ namespace PrefabAssetUtility.Editor
         /// <returns>List of GUIDs that this prefab uses</returns>
         public static List<string> GetGUIDsForPrefab(string prefabPath)
         {
-            return _prefabToGUID[prefabPath];
+            return _prefabToGUID.ContainsKey(prefabPath) ? _prefabToGUID[prefabPath] : new List<string>();
+        }
+
+        /// <summary>
+        /// Get the list of prefab paths that reference the given Component
+        /// </summary>
+        /// <typeparam name="T">Type to check for</typeparam>
+        /// <returns>List of prefabs using the Component</returns>
+        public static List<string> GetPrefabsWithComponent<T>()
+        {
+            return GetPrefabsWithComponent(typeof(T));
+        }
+
+        
+        /// <summary>
+        /// Get the list of prefab paths that reference the given Component
+        /// </summary>
+        /// <param name="type">Type to check for</param>
+        /// <returns>List of prefabs using the Component</returns>
+        public static List<string> GetPrefabsWithComponent(Type type)
+        {
+            string name = type.Name;
+            return _componentToPrefab.ContainsKey(name) ? _componentToPrefab[name] : new List<string>();
+        }
+
+        /// <summary>
+        /// Get the list of Components that the prefab uses
+        /// </summary>
+        /// <param name="prefabPath">The relative path to the prefab, <see cref="AssetDatabase.GetAssetPath"/></param>
+        /// <returns>List of all Components attached to the prefab</returns>
+        public static List<string> GetComponentsForPrefab(string prefabPath)
+        {
+            return _prefabToComponent.ContainsKey(prefabPath) ? _prefabToComponent[prefabPath] : new List<string>();
         }
     }
 }

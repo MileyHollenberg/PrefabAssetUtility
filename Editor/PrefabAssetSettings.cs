@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -25,6 +26,12 @@ namespace PrefabAssetUtility.Editor
                     if (GUILayout.Button("Force refresh cache"))
                     {
                         PrefabUtils.RefreshPrefabCache();
+                    }
+
+                    if (GUILayout.Button("Test"))
+                    {
+                        Debug.Log(JsonConvert.SerializeObject(PrefabUtils.GetComponentsForPrefab("Assets/Prefabs/Preb1.prefab")));
+                        Debug.Log(JsonConvert.SerializeObject(PrefabUtils.GetPrefabsWithComponent<MonoBehaviour>()));
                     }
                 },
                 keywords = new HashSet<string>(new[] {"camera", "aim", "start"})
