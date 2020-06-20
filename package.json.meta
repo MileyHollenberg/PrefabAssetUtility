@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 12b4d94e820ac5444a5717bd1a17f12a
+guid: e4cfd641f1fd30f47b9295685e8dd50f
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -9,7 +9,7 @@ ScriptedImporter:
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 305d72b64a2242c0b6ff1d70a6bc89f4, type: 3}
   name: io.megamiley.prefab-asset-utility
-  version: 0.1.0
+  version: 0.1.1
   displayName: PrefabAssetUtility
   description: 'Utility package that allows you to get all prefabs using a certain
     asset and visa versa.

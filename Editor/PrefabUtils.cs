@@ -20,11 +20,11 @@ namespace PrefabAssetUtility.Editor
 
         private static string _basePath;
 
-        private static Dictionary<string, List<string>> _prefabToGUID = new Dictionary<string, List<string>>();
-        private static Dictionary<string, List<string>> _GUIDToPrefab = new Dictionary<string, List<string>>();
+        private static Dictionary<string, HashSet<string>> _prefabToGUID = new Dictionary<string, HashSet<string>>();
+        private static Dictionary<string, HashSet<string>> _GUIDToPrefab = new Dictionary<string, HashSet<string>>();
 
-        private static Dictionary<string, List<string>> _prefabToComponent = new Dictionary<string, List<string>>();
-        private static Dictionary<string, List<string>> _componentToPrefab = new Dictionary<string, List<string>>();
+        private static Dictionary<string, HashSet<string>> _prefabToComponent = new Dictionary<string, HashSet<string>>();
+        private static Dictionary<string, HashSet<string>> _componentToPrefab = new Dictionary<string, HashSet<string>>();
 
         private static readonly Regex _guidRegex = new Regex(@"guid: (.*?),",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -107,8 +107,8 @@ namespace PrefabAssetUtility.Editor
         private static void ProcessCacheForAsset(string asset)
         {
             string path = $"{_basePath}{asset}";
-            List<string> GUIDs = new List<string>();
-            List<string> Components = new List<string>();
+            HashSet<string> GUIDs = new HashSet<string>();
+            HashSet<string> Components = new HashSet<string>();
 
             try
             {
@@ -137,11 +137,9 @@ namespace PrefabAssetUtility.Editor
             }
         }
 
-        private static void AddToLists(string asset, List<string> Components,
-            ref Dictionary<string, List<string>> _aToB, ref Dictionary<string, List<string>> _bToA)
+        private static void AddToLists(string asset, HashSet<string> Components,
+            ref Dictionary<string, HashSet<string>> _aToB, ref Dictionary<string, HashSet<string>> _bToA)
         {
-            Components = Components.Distinct().ToList();
-
             if (_aToB.ContainsKey(asset))
                 _aToB[asset] = Components;
             else
@@ -150,12 +148,9 @@ namespace PrefabAssetUtility.Editor
             foreach (string component in Components)
             {
                 if (_bToA.ContainsKey(component))
-                {
                     _bToA[component].Add(asset);
-                    _bToA[component] = _bToA[component].Distinct().ToList();
-                }
                 else
-                    _bToA.Add(component, new List<string> {asset});
+                    _bToA.Add(component, new HashSet<string> {asset});
             }
         }
 
@@ -166,22 +161,22 @@ namespace PrefabAssetUtility.Editor
             {
                 using (StreamReader reader = new StreamReader(_basePath + PREFAB_TO_GUID_PATH))
                 {
-                    _prefabToGUID = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
+                    _prefabToGUID = JsonConvert.DeserializeObject<Dictionary<string, HashSet<string>>>(reader.ReadToEnd());
                 }
 
                 using (StreamReader reader = new StreamReader(_basePath + GUID_TO_PREFAB_PATH))
                 {
-                    _GUIDToPrefab = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
+                    _GUIDToPrefab = JsonConvert.DeserializeObject<Dictionary<string, HashSet<string>>>(reader.ReadToEnd());
                 }
                 
                 using (StreamReader reader = new StreamReader(_basePath + PREFAB_TO_COMPONENT_PATH))
                 {
-                    _prefabToComponent = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
+                    _prefabToComponent = JsonConvert.DeserializeObject<Dictionary<string, HashSet<string>>>(reader.ReadToEnd());
                 }
 
                 using (StreamReader reader = new StreamReader(_basePath + COMPONENT_TO_PREFAB_PATH))
                 {
-                    _componentToPrefab = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(reader.ReadToEnd());
+                    _componentToPrefab = JsonConvert.DeserializeObject<Dictionary<string, HashSet<string>>>(reader.ReadToEnd());
                 }
             }
             else
@@ -224,7 +219,7 @@ namespace PrefabAssetUtility.Editor
         /// <returns>List of prefabs using the GUID</returns>
         public static List<string> GetPrefabsForGUID(string GUID)
         {
-            return _GUIDToPrefab.ContainsKey(GUID) ? _GUIDToPrefab[GUID] : new List<string>();
+            return _GUIDToPrefab.ContainsKey(GUID) ? _GUIDToPrefab[GUID].ToList() : new List<string>();
         }
 
         /// <summary>
@@ -234,7 +229,7 @@ namespace PrefabAssetUtility.Editor
         /// <returns>List of GUIDs that this prefab uses</returns>
         public static List<string> GetGUIDsForPrefab(string prefabPath)
         {
-            return _prefabToGUID.ContainsKey(prefabPath) ? _prefabToGUID[prefabPath] : new List<string>();
+            return _prefabToGUID.ContainsKey(prefabPath) ? _prefabToGUID[prefabPath].ToList() : new List<string>();
         }
 
         /// <summary>
@@ -256,7 +251,7 @@ namespace PrefabAssetUtility.Editor
         public static List<string> GetPrefabsWithComponent(Type type)
         {
             string name = type.Name;
-            return _componentToPrefab.ContainsKey(name) ? _componentToPrefab[name] : new List<string>();
+            return _componentToPrefab.ContainsKey(name) ? _componentToPrefab[name].ToList() : new List<string>();
         }
 
         /// <summary>
@@ -266,7 +261,7 @@ namespace PrefabAssetUtility.Editor
         /// <returns>List of all Components attached to the prefab</returns>
         public static List<string> GetComponentsForPrefab(string prefabPath)
         {
-            return _prefabToComponent.ContainsKey(prefabPath) ? _prefabToComponent[prefabPath] : new List<string>();
+            return _prefabToComponent.ContainsKey(prefabPath) ? _prefabToComponent[prefabPath].ToList() : new List<string>();
         }
     }
 }
