@@ -168,9 +168,9 @@ namespace PrefabAssetUtility.Editor
 
         private static bool IsCacheReady()
         {
-            return _prefabToGUID.Count > 0 || 
-                   _GUIDToPrefab.Count > 0 || 
-                   _prefabToComponent.Count > 0 ||
+            return _prefabToGUID.Count > 0 && 
+                   _GUIDToPrefab.Count > 0 &&
+                   _prefabToComponent.Count > 0 &&
                    _componentToPrefab.Count > 0;
         }
 
