@@ -7,6 +7,7 @@
     "unity"       : "2018.4",
     "unityRelease" : "",
     "dependencies" : {
+        "com.unity.nuget.newtonsoft-json": "2.0.0"
     },
     "keywords"     : [
         "prefab",
